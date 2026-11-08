@@ -260,4 +260,4 @@ if __name__ == "__main__":
         bot.send_message(ADMIN_ID, f"online\n{info}\n\n{caps}", reply_markup=main_kb())
     except Exception as e:
         log.warning("startup message failed: %s", e)
-    bot.infinity_polling(timeout=90, long_polling_timeout=90, interval=7)_MAIN
+    bot.infinity_polling(timeout=90, long_polling_timeout=90, interval=7)
