@@ -76,7 +76,6 @@ nuitka ^
   --assume-yes-for-downloads ^
   --remove-output ^
   --lto=yes ^
-  --mingw64 ^
   --include-package=Crypto ^
   --include-package=modules ^
   rat.py
